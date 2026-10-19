@@ -1,0 +1,8 @@
+# Build output / fichiers compiles
+dist/
+*.exe
+*.pdb
+
+# Backups made by the converter / copies faites par le convertisseur
+*.bak
+*.tmp

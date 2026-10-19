@@ -1,0 +1,75 @@
+﻿ZEUS - WORLD MAPS TOOLS 1.0 (World Map Converter, World Map Generator) - Le Maître de l'Olympe (Zeus / Poséidon)
+=================================================================================================================
+(English version: README.txt)
+
+À quoi ça sert
+--------------
+En grand écran, le jeu affiche la mappemonde dans un petit coin de l'écran.
+Avec des mappemondes plein écran, il faut aussi replacer les cités, les noms de
+régions et les routes commerciales de chaque scénario sur la carte agrandie.
+C'est ce que fait ce programme, quelle que soit la taille de la mappemonde, sur :
+  - les scénarios (.pak, .set),
+  - les cartes de l'éditeur d'aventures (.map),
+  - les sauvegardes des parties en cours (.sav : une partie garde sa propre copie
+    de la mappemonde, y compris celle des épisodes suivants d'une aventure).
+
+Les mappemondes
+---------------
+Aucune image n'est fournie : « World Map Generator.exe » fabrique les 14 mappemondes
+sur votre ordinateur, à partir des cartes d'origine de VOTRE jeu, pour n'importe
+quelle résolution. La carte est placée à gauche (comme l'originale), au centre ou à
+droite ; à côté : panneau Olympus / Atlantis, eau texturée ou image personnalisée,
+avec ou sans frise grecque. Le bouton « D'après un Zeus.exe… » lit la résolution dans
+l'exe. Les originales sont gardées dans « Mappemondes d'origine » et peuvent être remises.
+
+Utilisation du convertisseur
+----------------------------
+1. Lancez « World Map Converter.exe » (rien à installer).
+2. Choisissez d'abord le Zeus.exe du jeu : le programme indique sa version (anglais
+   2.1.4.0 ou français), sa résolution et l'état de son éditeur de scénarios, et propose
+   la taille de la mappemonde : celle installée à côté de l'exe (DATA), sinon celle de la
+   vue d'après la résolution. Changez-la si besoin (1738 x 1080, 2376 x 1410 ou
+   « Autre taille ») et choisissez la position de la carte (à gauche, au centre, à droite),
+   la même que dans le générateur.
+3. Laissez cochée « Patcher l'éditeur de scénarios de cet exe pour cette mappemonde » :
+   l'éditeur placera les cités sur toute la carte agrandie (exe anglais ou français,
+   n'importe quelle taille). Une copie de l'exe d'origine est gardée (Zeus.exe.bak).
+4. Glissez vos fichiers (ou les dossiers Adventures et Save du jeu) dans la fenêtre, ou
+   utilisez « Ajouter des fichiers… » / « Ajouter un dossier… ».
+5. Choisissez « Remplacer les fichiers » (une copie de l'original est gardée à côté, en
+   « .bak ») ou « Enregistrer les fichiers convertis dans ce dossier ».
+6. Cliquez sur « Convertir » : l'éditeur est patché si besoin, puis les fichiers convertis.
+
+Le bouton « Restaurer les originaux » remet les fichiers .bak en place.
+La liste « Langue » en haut à droite passe le programme en anglais.
+
+Bon à savoir
+------------
+- Un fichier déjà converti pour la même mappemonde est reconnu et laissé tel quel :
+  il n'est jamais agrandi deux fois.
+- Changer de taille ou de position est possible : depuis l'original .bak s'il est
+  là (résultat identique à une conversion directe), sinon directement (un pixel
+  d'écart au plus).
+- Avant d'écrire quoi que ce soit, le programme vérifie qu'il ne modifie que les
+  positions de la mappemonde. En cas de doute, le fichier n'est pas touché.
+- Pour une partie déjà commencée, convertissez aussi ses sauvegardes (.sav).
+  Une sauvegarde d'aventure contient la mappemonde des épisodes suivants : elle
+  est convertie aussi. Une sauvegarde abîmée par une version précédente (cités
+  agrandies mais routes d'origine après un changement d'épisode) est réparée.
+- Pour un jeu anglais en français, voir Zeus Patcher
+  (https://github.com/Vicinity4813/zeus-patcher).
+- Le programme ne se connecte jamais à Internet et ne modifie que les fichiers
+  que vous lui donnez. Son code source est fourni dans le dossier « source ».
+
+Crédits
+-------
+- La lecture des fichiers .pak / .set (décompression PKWare DCL, structure des
+  cartes) est adaptée de zeus_mapper, de zawapl (Jakub Zawadzki), sous licence
+  MIT : voir source\LICENSE-zeus_mapper.txt.
+- Le Maître de l'Olympe (Zeus / Poséidon) : Impressions Games / Sierra.
+
+Ligne de commande
+-----------------
+"World Map Converter.exe" [--resolution 1080|1440|LxH] [--taille LxH] [--exe Zeus.exe [--editeur]]
+                               [--position gauche|centre|droite] [--sortie DOSSIER] fichiers...
+"World Map Generator.exe" --jeu DOSSIER (--resolution LxH | --taille LxH) [--position ...] [--fond panneau|eau|image --image FICHIER] [--sans-frise] | --restaurer
