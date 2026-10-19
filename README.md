@@ -3,7 +3,16 @@
 **Full-screen world maps for *Zeus: Master of Olympus* / *Poseidon* at any resolution: generator, converter and scenario editor patch**
 · [Version française plus bas](#français)
 
-At widescreen resolutions, the game shows the world map in a small corner of the screen. These tools make it full screen, **at any resolution**, from your own copy of the game. No game file and no picture is provided.
+![Generated world map (3440 x 1440): Greece between Italy and Anatolia](docs/images/greece-3440x1440.jpg)
+*Generated world map (3440 x 1440, reduced): Greece between Italy and Anatolia.*
+
+![In game (2560 x 1440): cities, region names and trade routes moved by the converter](docs/images/in-game-2560x1440.jpg)
+*In game (2560 x 1440): cities, region names and trade routes moved by the converter.*
+
+![Patched scenario editor on a Poseidon map (2560 x 1440)](docs/images/editor-2560x1440.jpg)
+*Patched scenario editor on a Poseidon map (2560 x 1440): cities placed anywhere on the original map, enlarged.*
+
+At widescreen resolutions, the game shows the world map in a small corner of the screen. These tools make it full screen, **at any resolution**, from your own copy of the game. No game file and no world map is provided (the pictures below are screenshots).
 
 - **World Map Generator** makes the 14 world maps (10 Zeus, 4 Poseidon) on your computer, from the original maps of your game, at the size of your exe's view. The map is centred. Greece sits between Italy and Anatolia: these lands are drawn once on a 3440 x 1440 reference (outline from Poseidon_map04, relief from the map of Greece), and every smaller resolution is a centred crop of it; the drawings in the bottom-left corner of maps 01-07 move to the bottom-left corner of the enlarged world map. Poseidon maps are drawn on a 1440p reference (neighbouring maps and real coastlines around); on wider screens, beside it: the Atlantis parchment panel with the god's portrait, textured water made from the map's own sea, or a picture of your choice, with or without a Greek key border.
 - **World Map Converter** starts from the game's `Zeus.exe`: it checks its version and language (English 2.1.4.0 or French) and its resolution, **patches its scenario editor** for the enlarged world map (the original city zone, enlarged with the map, never outside the original map; any resolution, any world map, English or French exe; to our knowledge a first), then moves the cities, region names and trade routes of your scenarios (`.pak`, `.set`), editor maps (`.map`) and saved games (`.sav`) onto the enlarged map.
@@ -43,7 +52,7 @@ Run `build.cmd`: it uses the C# compiler that ships with Windows (.NET Framework
 - Reading `.pak` / `.set` files is adapted from **zeus_mapper** by zawapl (Jakub Zawadzki), MIT License, see [LICENSE-zeus_mapper.txt](LICENSE-zeus_mapper.txt).
 - Thanks to **JackFuste** for the widescreen exes the tools were tested on, and to **XJDHDR** (Impressions Resolution Customiser), whose offset table shows where the resolution is written in the English exe.
 - Coastlines around the Poseidon maps: **Natural Earth** (naturalearthdata.com), public domain.
-- *Zeus: Master of Olympus* / *Poseidon* are games by Impressions Games / Sierra. This is a fan project, not affiliated with them; it includes no game file and no picture from the game.
+- *Zeus: Master of Olympus* / *Poseidon* are games by Impressions Games / Sierra. This is a fan project, not affiliated with them; it includes no game file and no world map from the game (only the screenshots in `docs/images`).
 
 ---
 
@@ -51,7 +60,16 @@ Run `build.cmd`: it uses the C# compiler that ships with Windows (.NET Framework
 
 **Mappemondes plein écran pour *Le Maître de l'Olympe : Zeus* / *Poséidon* à n'importe quelle résolution : générateur, convertisseur et patch de l'éditeur de scénarios**
 
-En grand écran, le jeu affiche la mappemonde dans un petit coin de l'écran. Ces outils la passent en plein écran, **à n'importe quelle résolution**, à partir de votre propre exemplaire du jeu. Aucun fichier ni aucune image du jeu n'est fourni.
+![Mappemonde générée (3440 x 1440) : la Grèce entre l'Italie et l'Anatolie](docs/images/greece-3440x1440.jpg)
+*Mappemonde générée (3440 x 1440, réduite) : la Grèce entre l'Italie et l'Anatolie.*
+
+![En jeu (2560 x 1440) : cités, noms de régions et routes replacés par le convertisseur](docs/images/in-game-2560x1440.jpg)
+*En jeu (2560 x 1440) : cités, noms de régions et routes replacés par le convertisseur.*
+
+![Éditeur de scénarios patché sur une carte de Poséidon (2560 x 1440)](docs/images/editor-2560x1440.jpg)
+*Éditeur de scénarios patché sur une carte de Poséidon (2560 x 1440) : cités placées partout sur la carte d'origine agrandie.*
+
+En grand écran, le jeu affiche la mappemonde dans un petit coin de l'écran. Ces outils la passent en plein écran, **à n'importe quelle résolution**, à partir de votre propre exemplaire du jeu. Aucun fichier du jeu ni aucune mappemonde n'est fourni (les images ci-dessous sont des captures d'écran).
 
 - **World Map Generator** fabrique les 14 mappemondes (10 de Zeus, 4 de Poséidon) sur votre ordinateur, à partir des cartes d'origine de votre jeu, à la taille de la vue de votre exe. La carte est au centre. La Grèce est entourée de l'Italie et de l'Anatolie : ces terres sont dessinées une fois sur une référence 3440 x 1440 (contour d'après Poseidon_map04, relief d'après la carte de la Grèce), et chaque résolution plus petite en est un recadrage centré ; les dessins du coin bas-gauche des cartes 01 à 07 passent dans le coin bas-gauche de la mappemonde agrandie. Les cartes de Poséidon sont dessinées sur une référence 1440p (cartes voisines et vraies côtes autour) ; sur un écran plus large, à côté : le panneau en parchemin Atlantis avec le portrait du dieu, de l'eau texturée faite à partir de la mer de la carte, ou une image de votre choix, avec ou sans frise grecque.
 - **World Map Converter** part du `Zeus.exe` du jeu : il vérifie sa version et sa langue (anglais 2.1.4.0 ou français) et sa résolution, **patche son éditeur de scénarios** pour la mappemonde agrandie (la zone des cités d'origine, agrandie avec la carte, jamais hors de la carte d'origine ; n'importe quelle résolution, n'importe quelle mappemonde, exe anglais ou français ; une première, à notre connaissance), puis replace les cités, noms de régions et routes de vos scénarios (`.pak`, `.set`), cartes de l'éditeur (`.map`) et sauvegardes (`.sav`) sur la carte agrandie.
@@ -91,4 +109,4 @@ Lancez `build.cmd` : il utilise le compilateur C# fourni avec Windows (.NET Fram
 - La lecture des fichiers `.pak` / `.set` est adaptée de **zeus_mapper** de zawapl (Jakub Zawadzki), licence MIT, voir [LICENSE-zeus_mapper.txt](LICENSE-zeus_mapper.txt).
 - Merci à **JackFuste** pour les exe widescreen sur lesquels les outils ont été testés, et à **XJDHDR** (Impressions Resolution Customiser), dont la table d'adresses montre où la résolution est écrite dans l'exe anglais.
 - Côtes autour des cartes de Poséidon : **Natural Earth** (naturalearthdata.com), domaine public.
-- *Le Maître de l'Olympe : Zeus* / *Poséidon* sont des jeux d'Impressions Games / Sierra. Projet de fan, sans lien avec eux ; aucun fichier ni aucune image du jeu n'est inclus.
+- *Le Maître de l'Olympe : Zeus* / *Poséidon* sont des jeux d'Impressions Games / Sierra. Projet de fan, sans lien avec eux ; aucun fichier du jeu ni aucune mappemonde n'est inclus (seulement les captures d'écran de `docs/images`).

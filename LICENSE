@@ -24,10 +24,11 @@ SOFTWARE.
 
 The MIT License above covers the source code and the programs.
 
-No game file and no picture from the game is included in this project: the
-world map generator builds the world maps from the original maps of the user's
-own game, on the user's computer. Zeus: Master of Olympus / Poseidon are games
-by Impressions Games / Sierra.
+No game file and no world map from the game is included in this project (only
+screenshots, in docs/images, to show the tools): the world map generator builds
+the world maps from the original maps of the user's own game, on the user's
+computer. Zeus: Master of Olympus / Poseidon are games by Impressions Games /
+Sierra.
 
 Parts of src/ZeusPak.cs are adapted from zeus_mapper by zawapl (MIT License),
 see LICENSE-zeus_mapper.txt.
