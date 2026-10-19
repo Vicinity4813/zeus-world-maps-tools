@@ -8,7 +8,7 @@ At widescreen resolutions, the game shows the world map in a small corner of the
 - **World Map Generator** makes the 14 world maps (10 Zeus, 4 Poseidon) on your computer, from the original maps of your game, at the size of your exe's view. The map is set on the left (like the original), centred or on the right; beside it: the Olympus / Atlantis parchment panel with the god's portrait, textured water made from the map's own sea, or a picture of your choice, with or without a Greek key border.
 - **World Map Converter** starts from the game's `Zeus.exe`: it checks its version and language (English 2.1.4.0 or French) and its resolution, **patches its scenario editor** for the enlarged world map (any resolution, any world map, English or French exe; to our knowledge a first), then moves the cities, region names and trade routes of your scenarios (`.pak`, `.set`), editor maps (`.map`) and saved games (`.sav`) onto the enlarged map.
 
-To play an English game in French, see **[Zeus Patcher](https://github.com/Vicinity4813/zeus-patcher)**.
+To play an English game in French, see **[Zeus - EXE French Patch](https://github.com/Vicinity4813/zeus-exe-french-patch)**.
 
 ## Download
 
@@ -55,7 +55,7 @@ En grand écran, le jeu affiche la mappemonde dans un petit coin de l'écran. Ce
 - **World Map Generator** fabrique les 14 mappemondes (10 de Zeus, 4 de Poséidon) sur votre ordinateur, à partir des cartes d'origine de votre jeu, à la taille de la vue de votre exe. La carte est calée à gauche (comme l'originale), au centre ou à droite ; à côté : le panneau en parchemin Olympus / Atlantis avec le portrait du dieu, de l'eau texturée faite à partir de la mer de la carte, ou une image de votre choix, avec ou sans frise grecque.
 - **World Map Converter** part du `Zeus.exe` du jeu : il vérifie sa version et sa langue (anglais 2.1.4.0 ou français) et sa résolution, **patche son éditeur de scénarios** pour la mappemonde agrandie (n'importe quelle résolution, n'importe quelle mappemonde, exe anglais ou français ; une première, à notre connaissance), puis replace les cités, noms de régions et routes de vos scénarios (`.pak`, `.set`), cartes de l'éditeur (`.map`) et sauvegardes (`.sav`) sur la carte agrandie.
 
-Pour jouer en français avec un jeu anglais, voir **[Zeus Patcher](https://github.com/Vicinity4813/zeus-patcher)**.
+Pour jouer en français avec un jeu anglais, voir **[Zeus - EXE French Patch](https://github.com/Vicinity4813/zeus-exe-french-patch)**.
 
 ### Téléchargement
 

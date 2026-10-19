@@ -54,8 +54,8 @@ Good to know
   world map of the next episodes: it is converted too. A save damaged by an earlier
   version (cities enlarged but routes back to the original after an episode change) is
   repaired.
-- To play an English game in French, see Zeus Patcher
-  (https://github.com/Vicinity4813/zeus-patcher).
+- To play an English game in French, see Zeus - EXE French Patch
+  (https://github.com/Vicinity4813/zeus-exe-french-patch).
 - The program never connects to the Internet and only changes the files you give it.
   Its source code is in the "source" folder.
 

@@ -56,8 +56,8 @@ Bon à savoir
   Une sauvegarde d'aventure contient la mappemonde des épisodes suivants : elle
   est convertie aussi. Une sauvegarde abîmée par une version précédente (cités
   agrandies mais routes d'origine après un changement d'épisode) est réparée.
-- Pour un jeu anglais en français, voir Zeus Patcher
-  (https://github.com/Vicinity4813/zeus-patcher).
+- Pour un jeu anglais en français, voir Zeus - EXE French Patch
+  (https://github.com/Vicinity4813/zeus-exe-french-patch).
 - Le programme ne se connecte jamais à Internet et ne modifie que les fichiers
   que vous lui donnez. Son code source est fourni dans le dossier « source ».
 
