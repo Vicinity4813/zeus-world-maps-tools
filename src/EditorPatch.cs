@@ -1,11 +1,12 @@
-// Patch de l'editeur de mappemonde pour des mappemondes plus grandes que l'originale (838 x 738).
+﻿// Patch de l'editeur de mappemonde pour des mappemondes plus grandes que l'originale (838 x 738).
 // Correction validee en jeu sur l'exe francais (fonction de placement 0x408E50-0x409028), retrouvee dans la
 // compilation anglaise 2.1.4.0 (0x406CE0-0x406F00) :
-//   1. le controle « souris dans un rectangle 555 x 556 » (taille de la mappemonde d'origine) est saute ;
+//   1. le controle « souris dans un rectangle 555 x 556 » (taille de la mappemonde d'origine) est saute (anglais :
+//      en rechargeant d'abord ebx, le y de la souris, que ce code chargeait et dont le controle de l'icone se sert) ;
 //   2. le controle de la position de l'icone s'applique avec tous les outils (sinon cites possibles hors carte) ;
 //   3. les limites de ce controle, autour du centre de l'image (299 / 299 / 285 / 285 a l'origine), suivent la
-//      mappemonde installee : la carte peinte (838 x 738 agrandie) peut etre calee a gauche (comme l'originale),
-//      au centre ou a droite de l'image.
+//      mappemonde installee : la zone d'origine est agrandie avec la carte peinte (838 x 738 agrandie), calee a gauche
+//      (comme l'originale), au centre ou a droite de l'image.
 using System;
 using System.Collections.Generic;
 
@@ -21,13 +22,14 @@ public static class EditorPatch
         public byte[] JneOrig;
         public uint[] Lim;            // gauche, droite, haut, bas (valeurs 32 bits)
         public bool NegLeftTop;       // anglais : lea reg,[eax-L] (valeur negative) ; francais : sub eax,L
+        public bool ReloadEbx;        // anglais : le code saute charge ebx (y de la souris), utilise ensuite par le controle de l'icone
         public byte[][] LimCtx;       // octets juste avant chaque limite (reconnaissance de la fonction)
     }
 
     static readonly Build_[] Builds = {
         new Build_ { Name = "anglais 2.1.4.0", MouseCheck = 0x00406D0B, ModeTest = 0x00406DD0, ModeJne = 0x00406DD8,
             JneOrig = new byte[] { 0x0F, 0x85, 0x1A, 0x01, 0x00, 0x00 },
-            Lim = new uint[] { 0x00406EB1, 0x00406EC0, 0x00406ED8, 0x00406EE7 }, NegLeftTop = true,
+            Lim = new uint[] { 0x00406EB1, 0x00406EC0, 0x00406ED8, 0x00406EE7 }, NegLeftTop = true, ReloadEbx = true,
             LimCtx = new[] { new byte[] { 0x8D, 0x90 }, new byte[] { 0x05 }, new byte[] { 0x8D, 0x88 }, new byte[] { 0x05 } } },
         new Build_ { Name = "français", MouseCheck = 0x00408E50, ModeTest = 0x00408F34, ModeJne = 0x00408F3B,
             JneOrig = new byte[] { 0x0F, 0x85, 0xED, 0x00, 0x00, 0x00 },
@@ -37,10 +39,16 @@ public static class EditorPatch
 
     // Limites (gauche, droite, haut, bas) autour du centre d'une image w x h. La carte peinte est agrandie au plus
     // grand possible dans l'image (hauteur, ou largeur si l'image est etroite), calee en haut, et placee selon layout.
+    // La zone permise est celle du jeu d'origine (vue 838 x 735 : 299 / 299 autour de x = 419, 285 / 285 autour de
+    // y = 367, soit x 120-718 et y 82-652 sur la carte, icone comprise), agrandie avec la carte : aucune cite hors de
+    // la carte d'origine, meme quand des terres voisines sont peintes autour.
     public static int[] Limits(int w, int h, MapLayout layout)
     {
         int[] r = MapRect(w, h, layout);
-        return new[] { w / 2 - r[0], r[0] + r[2] - w / 2, h / 2 - r[1], r[1] + r[3] - h / 2 };
+        double s = r[2] / 838.0;
+        int x0 = r[0] + (int)Math.Round(120 * s), x1 = r[0] + (int)Math.Round(718 * s);
+        int y0 = r[1] + (int)Math.Round(82 * s), y1 = r[1] + (int)Math.Round(652 * s);
+        return new[] { w / 2 - x0, x1 - w / 2, h / 2 - y0, y1 - h / 2 };
     }
 
     // Rectangle de la carte peinte dans une image w x h : x, y, largeur, hauteur (meme regle pour le generateur
@@ -76,9 +84,30 @@ public static class EditorPatch
         if (b == null) return null;
         Pe pe = new Pe(exe);
         List<Site> s = new List<Site>();
-        byte[] jmp = new byte[5];
-        jmp[0] = 0xE9; Array.Copy(BitConverter.GetBytes((int)(b.ModeTest - (b.MouseCheck + 5))), 0, jmp, 1, 4);
-        s.Add(new Site("éditeur : contrôle de la souris", pe.Off(b.MouseCheck), new byte[] { 0x6A, 0x0C, 0x6A, 0x03, 0xE8 }, jmp));
+        int mo = pe.Off(b.MouseCheck);
+        if (!b.ReloadEbx)
+        {
+            byte[] jmp = new byte[5];
+            jmp[0] = 0xE9; Array.Copy(BitConverter.GetBytes((int)(b.ModeTest - (b.MouseCheck + 5))), 0, jmp, 1, 4);
+            s.Add(new Site("éditeur : contrôle de la souris", mo, new byte[] { 0x6A, 0x0C, 0x6A, 0x03, 0xE8 }, jmp));
+        }
+        else
+        {
+            // Anglais : le code saute contient « mov ebx,[y de la souris] » ; ebx sert plus loin au controle de l'icone.
+            // On le recharge avant de sauter (la version 1.0 sautait sans, d'ou un y au hasard : cites refusees).
+            byte[] ld = null;
+            for (int p = mo; p < pe.Off(b.ModeTest) - 6; p++)
+                if (exe[p] == 0x8B && exe[p + 1] == 0x1D) { ld = new byte[6]; Array.Copy(exe, p, ld, 0, 6); break; }
+            if (ld == null) return null;
+            byte[] code = new byte[11];
+            Array.Copy(ld, code, 6);
+            code[6] = 0xE9; Array.Copy(BitConverter.GetBytes((int)(b.ModeTest - (b.MouseCheck + 11))), 0, code, 7, 4);
+            byte[] orig = new byte[11];
+            Array.Copy(new byte[] { 0x6A, 0x0C, 0x6A, 0x03, 0xE8 }, orig, 5); Array.Copy(exe, mo + 5, orig, 5, 6);
+            Site ms = new Site("éditeur : contrôle de la souris", mo, orig, code);
+            ms.Value = true;   // remplace aussi le saut de la version 1.0
+            s.Add(ms);
+        }
         s.Add(new Site("éditeur : contrôle de l'icône", pe.Off(b.ModeJne), b.JneOrig, new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 }));
         int[] v = lim ?? new[] { 299, 299, 285, 285 };
         int[] o = { 299, 299, 285, 285 };

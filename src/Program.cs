@@ -33,10 +33,10 @@ static class Program
 
     static int[] Pair(string s) { string[] p = s.ToLowerInvariant().Split('x'); return new[] { int.Parse(p[0]), int.Parse(p[1]) }; }
 
-    // World Map Converter.exe [--resolution 1080|1440|LxH] [--taille LxH] [--exe Zeus.exe [--editeur]] [--position gauche|centre|droite] [--sortie DOSSIER] fichiers...
+    // World Map Converter.exe [--resolution 1080|1440|3440|LxH] [--taille LxH] [--exe Zeus.exe [--editeur]] [--sortie DOSSIER] fichiers...
     static int Cli(string[] args)
     {
-        string outDir = null, res = null, exe = null; int errors = 0, layout = 0; int[] size = null; bool editor = false;
+        string outDir = null, res = null, exe = null; int errors = 0, layout = 1; int[] size = null; bool editor = false;
         List<string> files = new List<string>();
         for (int i = 0; i < args.Length; i++)
         {
@@ -45,10 +45,9 @@ static class Program
             else if (args[i] == "--taille" && i + 1 < args.Length) size = Pair(args[++i]);
             else if (args[i] == "--exe" && i + 1 < args.Length) exe = args[++i];
             else if (args[i] == "--editeur") editor = true;
-            else if (args[i] == "--position" && i + 1 < args.Length) { string p = args[++i]; layout = p.StartsWith("c") ? 1 : p.StartsWith("d") || p.StartsWith("r") ? 2 : 0; }
             else files.Add(args[i]);
         }
-        Target target = Target.R1080;
+        Target target = Target.ForMap(1738, 1080, layout);
         if (size != null) target = Target.ForMap(size[0], size[1], layout);
         else if (exe != null)
         {
@@ -64,7 +63,7 @@ static class Program
             bool ok; Console.WriteLine(EditorCore.PatchEditor(exe, m2[0], m2[1], layout, out ok)); if (!ok) errors++;
         }
         else if (res != null && res.Contains("x")) target = Target.ForResolution(Pair(res)[0], Pair(res)[1], layout);
-        else if (res != null) target = res.StartsWith("1440") ? Target.R1440 : Target.R1080;
+        else if (res != null) target = res.StartsWith("3440") ? Target.ForMap(3238, 1410, layout) : res.StartsWith("1440") ? Target.ForMap(2376, 1410, layout) : Target.ForMap(1738, 1080, layout);
         foreach (string f in files)
         {
             string dst = outDir == null ? f : Path.Combine(outDir, Path.GetFileName(f));
@@ -139,9 +138,11 @@ class MainForm : Form
         lblEd = new Label { Location = new Point(490, 59), Size = new Size(234, 20), ForeColor = Color.DimGray, Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right };
         cboPreset.SelectedIndexChanged += (s, e) =>
         {
-            if (cboPreset.SelectedIndex == 0) { nW.Value = 1738; nH.Value = 1080; cboPos.SelectedIndex = 0; }
-            else if (cboPreset.SelectedIndex == 1) { nW.Value = 2376; nH.Value = 1410; cboPos.SelectedIndex = 0; }
-            nW.Enabled = nH.Enabled = cboPos.Enabled = cboPreset.SelectedIndex == 2;
+            if (cboPreset.SelectedIndex == 0) { nW.Value = 1738; nH.Value = 1080; cboPos.SelectedIndex = 1; }
+            else if (cboPreset.SelectedIndex == 1) { nW.Value = 2376; nH.Value = 1410; cboPos.SelectedIndex = 1; }
+            else if (cboPreset.SelectedIndex == 2) { nW.Value = 3238; nH.Value = 1410; cboPos.SelectedIndex = 1; }
+            nW.Enabled = nH.Enabled = cboPreset.SelectedIndex == 3;
+            cboPos.Enabled = false;   // carte toujours au centre (Grece entre l'Italie et l'Anatolie, cartes de Poseidon)
             ShowEditor();
         };
         nW.ValueChanged += (s, e) => ShowEditor();
@@ -222,9 +223,10 @@ class MainForm : Form
         {
             if (m[0] == 1738 && m[1] == 1080) cboPreset.SelectedIndex = 0;
             else if (m[0] == 2376 && m[1] == 1410) cboPreset.SelectedIndex = 1;
+            else if (m[0] == 3238 && m[1] == 1410) cboPreset.SelectedIndex = 2;
             else
             {
-                cboPreset.SelectedIndex = 2;
+                cboPreset.SelectedIndex = 3;
                 nW.Value = Math.Max(nW.Minimum, Math.Min(nW.Maximum, m[0])); nH.Value = Math.Max(nH.Minimum, Math.Min(nH.Maximum, m[1]));
             }
         }
@@ -268,12 +270,12 @@ class MainForm : Form
         gExe.Text = L.T("1. Zeus.exe du jeu", "1. The game's Zeus.exe");
         bExe.Text = L.T("Choisir…", "Choose…");
         gRes.Text = L.T("2. Mappemonde du jeu", "2. The game's world map");
-        int ip = cboPreset.SelectedIndex < 0 ? 0 : cboPreset.SelectedIndex, ipos = cboPos.SelectedIndex < 0 ? 0 : cboPos.SelectedIndex;
+        int ip = cboPreset.SelectedIndex < 0 ? 0 : cboPreset.SelectedIndex;
         cboPreset.Items.Clear();
-        cboPreset.Items.AddRange(new object[] { L.T("1738 x 1080 (1080p)", "1738 x 1080 (1080p)"), L.T("2376 x 1410 (1440p)", "2376 x 1410 (1440p)"), L.T("Autre taille :", "Other size:") });
+        cboPreset.Items.AddRange(new object[] { L.T("1738 x 1080 (1080p)", "1738 x 1080 (1080p)"), L.T("2376 x 1410 (1440p)", "2376 x 1410 (1440p)"), L.T("3238 x 1410 (3440 x 1440)", "3238 x 1410 (3440 x 1440)"), L.T("Autre taille :", "Other size:") });
         cboPos.Items.Clear();
         cboPos.Items.AddRange(new object[] { L.T("Carte à gauche", "Map on the left"), L.T("Carte au centre", "Map centred"), L.T("Carte à droite", "Map on the right") });
-        cboPos.SelectedIndex = ipos; cboPreset.SelectedIndex = ip;
+        cboPos.SelectedIndex = 1; cboPreset.SelectedIndex = ip;
         chkEditor.Text = L.T("Patcher l'éditeur de scénarios de cet exe pour cette mappemonde", "Patch this exe's scenario editor for this world map");
         bAddFiles.Text = L.T("Ajouter des fichiers…", "Add files…");
         bAddFolder.Text = L.T("Ajouter un dossier…", "Add a folder…");

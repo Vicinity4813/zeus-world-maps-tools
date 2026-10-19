@@ -273,7 +273,7 @@ public static class Mappe
         int friezeW = (int)Math.Round(40 * K), side = W - MW;
         if (Fill == 2 && CustomPath != null) return ComposeCustom(origPath);
         bool panel = Fill == 0 && Layout != 1 && side - friezeW >= 260 * K;
-        bool twoPanels = Fill == 0 && Layout == 1 && DX - friezeW >= 260 * K;
+        bool twoPanels = Fill == 0 && Layout == 1 && DX - friezeW >= 150 * K;
         using (Bitmap m = Scaled(origPath))
         {
             Bitmap canvas = SeaTexture(m, W, H);
@@ -359,6 +359,57 @@ public static class Mappe
             }
             return canvas;
         }
+    }
+
+    // Image deja composee (reference des cartes de Poseidon) au centre d'une mappemonde plus large (ultrawide) :
+    // de chaque cote, le choix des cartes de Poseidon (panneau Atlantis, eau texturee, image personnalisee). Setup fait.
+    public static Bitmap Surround(Bitmap center, string title, string sub, string godPath)
+    {
+        int ox = (W - center.Width) / 2, friezeW = (int)Math.Round(40 * K), rx0 = ox + center.Width;
+        if (Fill == 0 && ox - friezeW >= 150 * K)
+        {
+            Bitmap canvas = new Bitmap(W, H, PixelFormat.Format24bppRgb);
+            using (Graphics g = Graphics.FromImage(canvas))
+            {
+                g.SmoothingMode = SmoothingMode.AntiAlias;
+                int lw = ox - friezeW, rx = rx0 + friezeW, rw = W - rx;
+                g.DrawImageUnscaled(center, ox, 0);
+                using (Bitmap parch = Parchment(lw, H, 7)) { if (godPath != null) God(parch, godPath); g.DrawImageUnscaled(parch, 0, 0); }
+                using (Bitmap parch = Parchment(rw, H, 11)) g.DrawImageUnscaled(parch, rx, 0);
+                Frieze(g, lw, 0, friezeW, H);
+                Frieze(g, rx0, 0, friezeW, H);
+                Compass(g, rx + rw / 2, (int)Math.Round(420 * K), (int)Math.Round(Math.Min(170 * K, rw * 0.32)));
+                int cw = (int)Math.Min(rw - 80 * K, 392 * K);
+                int cy = Math.Min((int)Math.Round(760 * K), H - (int)Math.Round(230 * K));
+                Cartouche(g, rx + (rw - cw) / 2, cy, cw, (int)Math.Round(190 * K), title, sub);
+                if (godPath == null) Compass(g, lw / 2, (int)Math.Round(420 * K), (int)Math.Round(Math.Min(170 * K, lw * 0.32)));
+            }
+            return canvas;
+        }
+        Bitmap c = SeaTexture(center, W, H);
+        if (Fill == 2 && CustomPath != null && ox > friezeW)
+        {
+            int fw = ShowFrieze ? friezeW : 0;
+            Blend(c, center, ox, 0, 0);
+            using (Image img = Image.FromFile(CustomPath))
+            using (Graphics g = Graphics.FromImage(c))
+            {
+                g.InterpolationMode = InterpolationMode.HighQualityBicubic; g.PixelOffsetMode = PixelOffsetMode.HighQuality; g.SmoothingMode = SmoothingMode.AntiAlias;
+                Cover(g, img, new Rectangle(0, 0, ox - fw, H)); Cover(g, img, new Rectangle(rx0 + fw, 0, W - rx0 - fw, H));
+                if (fw > 0) { Frieze(g, ox - fw, 0, fw, H); Frieze(g, rx0, 0, fw, H); }
+            }
+            return c;
+        }
+        // eau texturee (ou bande trop etroite pour un panneau) : la reference se fond dans la mer
+        if (Fill == 1 && ShowFrieze && ox >= friezeW)
+        {
+            Blend(c, center, ox, 0, 0);
+            using (Graphics g = Graphics.FromImage(c)) { Frieze(g, ox - friezeW, 0, friezeW, H); Frieze(g, rx0, 0, friezeW, H); }
+            return c;
+        }
+        int f = Math.Min((int)Math.Round(110 * K), Math.Max(8, center.Width / 6));
+        Blend(c, center, ox, f, f);
+        return c;
     }
 
     // Dessine img dans r en le recadrant au centre (comme un fond « couvrir »).

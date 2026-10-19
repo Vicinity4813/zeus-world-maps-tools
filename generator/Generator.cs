@@ -1,7 +1,7 @@
 // Generateur de mappemondes : refait les 14 mappemondes du jeu (DATA) pour la taille de la vue de n'importe quel exe,
 // a partir des cartes d'origine 838x738 du jeu de l'utilisateur (rien n'est fourni). Les originales sont gardees dans
 // « <jeu>\Mappemondes d'origine » et peuvent etre remises en place.
-// En ligne de commande : World Map Generator.exe --jeu <dossier> (--resolution 2560x1440 | --taille 2338x1410) [--position gauche|centre|droite]
+// En ligne de commande : World Map Generator.exe --jeu <dossier> (--resolution 2560x1440 | --taille 2338x1410)
 //                        [--fond panneau|eau|image] [--image <fichier>]
 //                        World Map Generator.exe --jeu <dossier> --restaurer
 using System;
@@ -58,6 +58,7 @@ public static class Gen
         string data = Path.Combine(game, "DATA"), bak = Path.Combine(game, BackupDir);
         if (!Directory.Exists(data)) { log(L.T("Dossier DATA introuvable : choisissez le dossier du jeu (celui qui contient Zeus.exe).", "DATA folder not found: choose the game folder (the one with Zeus.exe)."), true); return false; }
         if (w < 838 || h < 600) { log(L.T("Taille trop petite.", "Size too small."), true); return false; }
+        layout = 1;   // carte toujours au centre : la Grece entre l'Italie et l'Anatolie (meme position pour le convertisseur)
         Mappe.Setup(w, h, layout);
         string where = layout == 0 ? L.T("à gauche", "on the left") : layout == 2 ? L.T("à droite", "on the right") : L.T("au centre", "centred");
         log(string.Format(L.T("Mappemondes de {0} x {1} px ; carte agrandie {2:F3} fois ({3} x {4} px), {5}.", "{0} x {1} px world maps; map enlarged {2:F3} times ({3} x {4} px), {5}."), w, h, Mappe.S, Mappe.MW, Mappe.MH, where), false);
@@ -85,12 +86,54 @@ public static class Gen
             todo.Add(new[] { saved, cur ?? Path.Combine(data, Path.GetFileName(saved)), m[1], m[2], m[3] });
         }
         if (todo.Count == 0) return false;
+
+        // Mappemondes de la Grece : recadrages de la reference 3440 (Grece au centre, Italie et Anatolie autour),
+        // faite a partir de la carte sans dessin et de Poseidon_map04 ; sans Poseidon, eau texturee autour.
+        string clean = FindImage(bak, "Zeus_MapOfGreece08") ?? FindImage(bak, "Zeus_MapOfGreece09") ?? FindImage(bak, "Zeus_MapOfGreece10");
+        string pos04 = FindImage(bak, "Poseidon_map04");
+        Bitmap reference = null;
+        if (clean != null && pos04 != null)
+        {
+            // reference a 1410 px de haut (vue d'un exe 3440 x 1440), ou plus haute / plus large si la vue l'exige
+            int rh = Math.Max(Voisins.RefH, h);
+            double k = Math.Min(h / 738.0, w / 838.0) / (rh / 738.0);
+            int rw = Math.Max((int)Math.Round(Voisins.RefW * rh / (double)Voisins.RefH), (int)Math.Ceiling(w / k) + 2);
+            log(string.Format(L.T("Référence de la Grèce : {0} x {1} px, Italie et Anatolie autour (d'après Poseidon_map04)…", "Greece reference: {0} x {1} px, Italy and Anatolia around it (from Poseidon_map04)…"), rw, rh), false);
+            reference = Voisins.Reference(clean, pos04, rw, rh);
+            Mappe.Setup(w, h, layout);
+        }
+        else if (clean != null)
+            log(L.T("Poseidon_map04 introuvable : la Grèce sera entourée d'eau texturée.", "Poseidon_map04 not found: Greece will be surrounded by textured water."), false);
+
+        // Mappemondes de Poseidon : reference « 1440p » de chaque carte (vraies voisines et vraies cotes autour)
+        int[] prs = Poseidon.RefSize(w, h);
+        bool posLogged = false;
+
         int done = 0;
         foreach (string[] t in todo)
         {
             string god = FindImage(data, t[4]);
-            using (Bitmap b = Mappe.Compose(t[0], t[2], t[3], god))
+            string name = Path.GetFileNameWithoutExtension(t[0]);
+            bool greece = name.StartsWith("Zeus_MapOfGreece", StringComparison.OrdinalIgnoreCase);
+            Bitmap posRef = null;
+            if (name.StartsWith("Poseidon_map", StringComparison.OrdinalIgnoreCase))
             {
+                if (!posLogged) { log(string.Format(L.T("Références de Poséidon : {0} x {1} px, cartes voisines et vraies côtes autour…", "Poseidon references: {0} x {1} px, neighbouring maps and real coastlines around…"), prs[0], prs[1]), false); posLogged = true; }
+                posRef = Poseidon.Reference(name, n => FindImage(bak, n), prs[0], prs[1]);
+                if (posRef == null) log(string.Format(L.T("  {0} : cartes d'origine inattendues, carte entourée selon le choix « à côté de la carte ».", "  {0}: unexpected original maps, map surrounded as chosen \"beside the map\"."), name), false);
+            }
+            Mappe.Setup(w, h, layout);
+            int keepFill = Mappe.Fill; bool keepFrieze = Mappe.ShowFrieze;
+            if (greece && reference == null) { Mappe.Fill = 1; Mappe.ShowFrieze = false; }
+            using (Bitmap b = greece && reference != null ? Voisins.Crop(reference, w, h)
+                            : posRef != null ? Poseidon.Fit(posRef, w, h, t[2], t[3], god)
+                            : Mappe.Compose(greece && clean != null ? clean : t[0], t[2], t[3], god))
+            {
+                if (posRef != null) posRef.Dispose();
+                Mappe.Setup(w, h, layout);
+                Mappe.Fill = keepFill; Mappe.ShowFrieze = keepFrieze;
+                // dessin du coin bas-gauche (Greece01-07) : deplace dans le coin bas-gauche de la mappemonde agrandie
+                if (greece && clean != null) Voisins.MoveArt(b, t[0], clean);
                 string tmp = t[1] + ".tmp";
                 Mappe.SaveJpg(b, tmp, 92);
                 Writable(t[1]);
@@ -100,8 +143,9 @@ public static class Gen
             done++;
             log("  " + Path.GetFileName(t[1]), false);
         }
+        if (reference != null) reference.Dispose();
         log(string.Format(L.T("{0} mappemondes faites. Originales gardées dans « {1} ».", "{0} world maps made. Originals kept in \"{1}\"."), done, BackupDir), false);
-        log(L.T("Convertissez maintenant les scénarios et sauvegardes avec le convertisseur, à la même taille et la même position.", "Now convert scenarios and saves with the converter, at the same size and position."), false);
+        log(L.T("Convertissez maintenant les scénarios et sauvegardes avec le convertisseur, à la même taille.", "Now convert scenarios and saves with the converter, at the same size."), false);
         return done == todo.Count;
     }
 
@@ -152,13 +196,12 @@ static class Program
             if (a[i] == "--jeu" && i + 1 < a.Length) game = a[++i];
             else if (a[i] == "--resolution" && i + 1 < a.Length) { int[] r = Pair(a[++i]); size = Gen.ViewOf(r[0], r[1]); }
             else if (a[i] == "--taille" && i + 1 < a.Length) size = Pair(a[++i]);
-            else if (a[i] == "--position" && i + 1 < a.Length) { string p = a[++i]; layout = p.StartsWith("c") ? 1 : p.StartsWith("d") || p.StartsWith("r") ? 2 : 0; }
             else if (a[i] == "--fond" && i + 1 < a.Length) { string f = a[++i]; fill = f.StartsWith("e") || f.StartsWith("w") ? 1 : f.StartsWith("i") ? 2 : 0; }
             else if (a[i] == "--image" && i + 1 < a.Length) { image = a[++i]; fill = 2; }
             else if (a[i] == "--sans-frise") frieze = false;
             else if (a[i] == "--restaurer") restore = true;
         }
-        if (game == null || (size == null && !restore)) { Console.WriteLine("World Map Generator.exe --jeu <dossier> (--resolution LxH | --taille LxH) [--position gauche|centre|droite] [--fond panneau|eau|image --image <fichier>] [--sans-frise] | --restaurer"); return 2; }
+        if (game == null || (size == null && !restore)) { Console.WriteLine("World Map Generator.exe --jeu <dossier> (--resolution LxH | --taille LxH) [--fond panneau|eau|image --image <fichier>] [--sans-frise] | --restaurer"); return 2; }
         bool err = false;
         Action<string, bool> log = (m, e) => { Console.WriteLine((e ? "ERREUR " : "") + m); if (e) err = true; };
         bool ok = restore ? Gen.Restore(game, log) : Gen.Generate(game, size[0], size[1], layout, fill, image, frieze, log);
@@ -209,9 +252,9 @@ class GenForm : Form
         lView = new Label { Location = new Point(232, 205), AutoSize = true, ForeColor = Color.FromArgb(90, 50, 20) };
         bExe = new Button { Location = new Point(560, 199), Size = new Size(184, 28), Anchor = AnchorStyles.Top | AnchorStyles.Right };
         lPos = new Label { Location = new Point(16, 240), AutoSize = true };
-        rLeft = new RadioButton { Location = new Point(24, 262), AutoSize = true, Checked = true };
-        rCenter = new RadioButton { Location = new Point(290, 262), AutoSize = true };
-        rRight = new RadioButton { Location = new Point(450, 262), AutoSize = true };
+        rLeft = new RadioButton { Location = new Point(24, 262), AutoSize = true, Visible = false };
+        rCenter = new RadioButton { Location = new Point(24, 262), AutoSize = true, Checked = true, Visible = false };
+        rRight = new RadioButton { Location = new Point(450, 262), AutoSize = true, Visible = false };
         gFill = new GroupBox { Location = new Point(16, 290), Size = new Size(728, 84), Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right };
         rPanel = new RadioButton { Location = new Point(12, 24), AutoSize = true, Checked = true };
         rSea = new RadioButton { Location = new Point(250, 24), AutoSize = true };
@@ -274,16 +317,16 @@ class GenForm : Form
     {
         Text = "World Map Generator — Zeus - World Maps Tools";
         title.Text = L.T("Mappemondes pour n'importe quelle résolution", "World maps for any resolution");
-        intro.Text = L.T("Refait les 14 mappemondes du jeu à la taille de la vue de votre exe, à partir des cartes d'origine de VOTRE jeu (rien n'est fourni). Les originales sont gardées et peuvent être remises. Ensuite, convertissez scénarios et sauvegardes avec le convertisseur, et passez le patcheur (éditeur) avec la même position.",
-                         "Remakes the game's 14 world maps at the view size of your exe, from the original maps of YOUR game (nothing is provided). The originals are kept and can be put back. Then convert scenarios and saves with the converter, and run the patcher (editor) with the same position.");
+        intro.Text = L.T("Refait les 14 mappemondes du jeu à la taille de la vue de votre exe, à partir des cartes d'origine de VOTRE jeu (rien n'est fourni). Les originales sont gardées et peuvent être remises. Ensuite, convertissez scénarios et sauvegardes avec le convertisseur, qui patche aussi l'éditeur de scénarios.",
+                         "Remakes the game's 14 world maps at the view size of your exe, from the original maps of YOUR game (nothing is provided). The originals are kept and can be put back. Then convert scenarios and saves with the converter, which also patches the scenario editor.");
         lGame.Text = L.T("Dossier du jeu :", "Game folder:");
         bGame.Text = L.T("Parcourir…", "Browse…");
         lRes.Text = L.T("Résolution de l'exe (largeur x hauteur) :", "Exe resolution (width x height):");
-        lPos.Text = L.T("Position de la carte dans la mappemonde :", "Position of the map in the world map:");
+        lPos.Text = L.T("Carte au centre : la Grèce entre l'Italie et l'Anatolie, les dessins des coins déplacés dans le coin bas-gauche.", "Map centred: Greece between Italy and Anatolia, the corner drawings moved to the bottom-left corner.");
         rLeft.Text = L.T("À gauche (comme l'originale)", "Left (like the original)");
         rCenter.Text = L.T("Au centre", "Centred");
         rRight.Text = L.T("À droite", "Right");
-        gFill.Text = L.T("À côté de la carte", "Beside the map");
+        gFill.Text = L.T("Mappemondes de Poséidon, écrans plus larges que le 1440p : de chaque côté", "Poseidon world maps, screens wider than 1440p: on each side");
         rPanel.Text = L.T("Panneau Olympus / Atlantis", "Olympus / Atlantis panel");
         rSea.Text = L.T("Eau texturée", "Textured water");
         rCustom.Text = L.T("Image personnalisée", "Custom picture");

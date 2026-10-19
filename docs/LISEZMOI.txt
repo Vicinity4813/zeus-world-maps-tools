@@ -17,10 +17,27 @@ Les mappemondes
 ---------------
 Aucune image n'est fournie : « World Map Generator.exe » fabrique les 14 mappemondes
 sur votre ordinateur, à partir des cartes d'origine de VOTRE jeu, pour n'importe
-quelle résolution. La carte est placée à gauche (comme l'originale), au centre ou à
-droite ; à côté : panneau Olympus / Atlantis, eau texturée ou image personnalisée,
-avec ou sans frise grecque. Le bouton « D'après un Zeus.exe… » lit la résolution dans
-l'exe. Les originales sont gardées dans « Mappemondes d'origine » et peuvent être remises.
+quelle résolution. La carte est toujours au centre :
+  - la Grèce (les 10 cartes de Zeus) est entourée de l'Italie à gauche et de l'Anatolie,
+    la mer Noire, Chypre et le Levant à droite. Ces terres sont dessinées une fois sur
+    une référence « 3440 x 1440 » (vue de 3238 x 1410), leur contour d'après
+    Poseidon_map04 et leur relief d'après la terre de la carte de la Grèce ; chaque
+    résolution plus petite en est un recadrage centré (une vue plus haute a une
+    référence refaite à sa hauteur). Sans Poséidon, la Grèce est entourée d'eau texturée ;
+  - les dessins du coin bas-gauche des cartes 01 à 07 sont déplacés dans le coin
+    bas-gauche de la mappemonde agrandie ; à leur ancienne place, la mer de la carte
+    sans dessin ;
+  - cartes de Poséidon : chacune est dessinée sur une référence « 1440p » (vue de
+    2338 x 1410). Les cartes 01, 02 et 03 sont la même peinture du monde : autour de
+    chaque carte, les vrais pixels des cartes voisines. Là où aucune carte n'est peinte
+    (ouest de map03, est de map02, les deux côtés de map04), les vraies côtes (Natural
+    Earth, domaine public) recalées sur la peinture, avec le relief, l'eau et la côte de
+    la carte elle-même ; pas de lacs. Les résolutions plus petites sont des recadrages
+    centrés de la référence. Sur un écran plus large (ultrawide), la référence reste au
+    centre et le reste reçoit le panneau Atlantis, l'eau texturée ou une image
+    personnalisée, avec ou sans frise grecque.
+Le bouton « D'après un Zeus.exe… » lit la résolution dans l'exe. Les originales sont
+gardées dans « Mappemondes d'origine » et peuvent être remises.
 
 Utilisation du convertisseur
 ----------------------------
@@ -28,12 +45,11 @@ Utilisation du convertisseur
 2. Choisissez d'abord le Zeus.exe du jeu : le programme indique sa version (anglais
    2.1.4.0 ou français), sa résolution et l'état de son éditeur de scénarios, et propose
    la taille de la mappemonde : celle installée à côté de l'exe (DATA), sinon celle de la
-   vue d'après la résolution. Changez-la si besoin (1738 x 1080, 2376 x 1410 ou
-   « Autre taille ») et choisissez la position de la carte (à gauche, au centre, à droite),
-   la même que dans le générateur.
+   vue d'après la résolution. Changez-la si besoin (1738 x 1080, 2376 x 1410, 3238 x 1410
+   ou « Autre taille ») ; la carte est au centre, comme dans le générateur.
 3. Laissez cochée « Patcher l'éditeur de scénarios de cet exe pour cette mappemonde » :
-   l'éditeur placera les cités sur toute la carte agrandie (exe anglais ou français,
-   n'importe quelle taille). Une copie de l'exe d'origine est gardée (Zeus.exe.bak).
+   l'éditeur placera les cités dans la zone d'origine de la carte, agrandie avec elle,
+   jamais hors de la carte d'origine (exe anglais ou français, n'importe quelle taille). Une copie de l'exe d'origine est gardée (Zeus.exe.bak).
 4. Glissez vos fichiers (ou les dossiers Adventures et Save du jeu) dans la fenêtre, ou
    utilisez « Ajouter des fichiers… » / « Ajouter un dossier… ».
 5. Choisissez « Remplacer les fichiers » (une copie de l'original est gardée à côté, en
@@ -66,10 +82,11 @@ Crédits
 - La lecture des fichiers .pak / .set (décompression PKWare DCL, structure des
   cartes) est adaptée de zeus_mapper, de zawapl (Jakub Zawadzki), sous licence
   MIT : voir source\LICENSE-zeus_mapper.txt.
+- Côtes autour des cartes de Poséidon : Natural Earth (naturalearthdata.com), domaine public.
 - Le Maître de l'Olympe (Zeus / Poséidon) : Impressions Games / Sierra.
 
 Ligne de commande
 -----------------
-"World Map Converter.exe" [--resolution 1080|1440|LxH] [--taille LxH] [--exe Zeus.exe [--editeur]]
-                               [--position gauche|centre|droite] [--sortie DOSSIER] fichiers...
-"World Map Generator.exe" --jeu DOSSIER (--resolution LxH | --taille LxH) [--position ...] [--fond panneau|eau|image --image FICHIER] [--sans-frise] | --restaurer
+"World Map Converter.exe" [--resolution 1080|1440|3440|LxH] [--taille LxH] [--exe Zeus.exe [--editeur]]
+                               [--sortie DOSSIER] fichiers...
+"World Map Generator.exe" --jeu DOSSIER (--resolution LxH | --taille LxH) [--fond panneau|eau|image --image FICHIER] [--sans-frise] | --restaurer
